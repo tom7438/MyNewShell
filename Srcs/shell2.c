@@ -8,7 +8,7 @@
 #include "csapp.h"
 #include "CommandesInternes.h"
 #include "handler.h"
-#include "../Headers/pipe.h"
+#include "pipe.h"
 
 int main() {
     int couleur = 31;

@@ -51,8 +51,7 @@ int pwd(){
 #ifdef DEBUG
     fprintf(stderr, "pwd called\n");
 #endif
-    char *s=(char *)malloc(sizeof(char)*MAX_CWD);
-    printf("%s\n", getcwd(s, MAX_CWD));
+    printf("%s\n", getenv("PWD"));
     return 0;
 }
 
@@ -60,34 +59,51 @@ int cd(char *directory){
 #ifdef DEBUG
     fprintf(stderr, "cd: %s\n", directory);
 #endif
-    putenv("OLDPWD=$PWD");
-    if(directory == NULL || !strcmp(directory, "~")){
-        char *home = getenv("HOME");
-        if(home == NULL){
-            printf("cd: HOME not set\n");
-            return 0;
-        }
-        if(chdir(home) == -1){
-            perror("chdir ");
-            exit(EXIT_FAILURE);
-        }
-        return 0;
-    }
-    if(!strcmp(directory, "-")){
-        char *oldpwd = getenv("OLDPWD");
-        if(oldpwd == NULL){
-            printf("cd: OLDPWD not set\n");
-            return 0;
-        }
-        if(chdir(oldpwd) == -1){
-            perror("chdir ");
-            exit(EXIT_FAILURE);
-        }
-        return 0;
+    char cwd[PATH_MAX];
+    char oldpwd[PATH_MAX];
+
+    if (getcwd(oldpwd, sizeof(oldpwd)) == NULL) {
+        perror("getcwd() error");
+        exit(EXIT_FAILURE);
     }
 
-    if(chdir(directory) == -1){
-        perror("chdir ");
+    /* Si aucun argument ou l'argument ~, on se deplace dans le repertoire home */
+    if(directory == NULL || directory[0] == '~'){
+        char *home = getenv("HOME");
+        if(home == NULL){
+            perror("getenv() error ");
+            exit(EXIT_FAILURE);
+        }
+        strcpy(cwd, home);
+        fprintf(stderr, "cd: %s\n", cwd);
+    /* Si l'argument est -, on se deplace dans le repertoire precedent */
+    } else if(directory[0] ==  '-') {
+        char *last_oldpwd = getenv("OLDPWD");
+        if(last_oldpwd == NULL){
+            perror("getenv() error ");
+            exit(EXIT_FAILURE);
+        }
+        strcpy(cwd, last_oldpwd);
+    /* Sinon on se deplace dans le repertoire specifie */
+    } else {
+        strcpy(cwd, directory);
+    }
+
+    /* On se deplace dans le repertoire */
+    if(chdir(cwd) == -1){
+        perror("chdir() error ");
+        exit(EXIT_FAILURE);
+    }
+
+    /* On met a jour les variables d'environnement */
+
+    if(setenv("OLDPWD", oldpwd, 1) == -1){
+        perror("setenv(OLDPWD) error ");
+        exit(EXIT_FAILURE);
+    }
+
+    if(setenv("PWD", getcwd(cwd, sizeof(cwd)), 1) == -1){
+        perror("setenv(PWD) error ");
         exit(EXIT_FAILURE);
     }
     return 0;

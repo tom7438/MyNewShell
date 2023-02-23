@@ -9,7 +9,6 @@
 #include "CommandesInternes.h"
 #include "handler.h"
 
-//volatile int sigint_flag = 0;
 
 int main() {
     int couleur = 31;

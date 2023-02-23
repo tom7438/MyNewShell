@@ -24,7 +24,20 @@ endif
 
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
-EXEC = $(BINDIR)/shell
+
+ifdef MAIN2
+	EXEC = $(BINDIR)/shell2
+	SRCS = $(wildcard $(SRCDIR)/*[^13].c)
+	OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+else ifdef MAIN3
+	EXEC = $(BINDIR)/shell3
+	SRCS = $(wildcard $(SRCDIR)/*[^12].c)
+	OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+else
+	EXEC = $(BINDIR)/shell1
+	SRCS = $(wildcard $(SRCDIR)/*[^23].c)
+	OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+endif
 
 all: $(EXEC)
 
@@ -35,5 +48,5 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 clean :
-	-@rm -r $(OBJS) $(SRCDIR)/*~ $(EXEC) 2>/dev/null || true
+	-@rm -r $(OBJDIR)/*.o $(SRCDIR)/*~ $(BINDIR)/* 2>/dev/null || true
 	@echo All is removed

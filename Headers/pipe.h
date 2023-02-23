@@ -9,4 +9,6 @@
 
 int Mypipe(struct cmdline * command);
 
+int commande(struct cmdline * command);
+
 #endif //MYNEWSHELL_PIPE_H

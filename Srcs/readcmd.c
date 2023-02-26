@@ -51,11 +51,6 @@ static char *readline(void)
 	    exit(0);
 	}
 
-    // Si la ligne est un retour à la ligne, on ne fait rien
-    if (buf[0] == '\n') {
-        return buf;
-    }
-
 	do {
 		size_t l = strlen(buf);
 		if ((l > 0) && (buf[l-1] == '\n')) {
@@ -173,10 +168,7 @@ struct cmdline *readcmd(void)
 			free(s);
 		}
 		return static_cmdline = 0;
-	} else if (!strcmp(line, "\n")) {
-        // Si la ligne est un retour à la ligne, on ne retourne pas static_cmdline = 0 mais une autre valeur qui dira au shell d'afficher le prompt
-        return static_cmdline = 0;
-    }
+	}
 
 	cmd = xmalloc(sizeof(char *));
 	cmd[0] = 0;

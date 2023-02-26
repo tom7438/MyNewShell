@@ -40,11 +40,16 @@ int main() {
             printf("error: %s\n", command->err);
             continue;
         }
-        if ((command->out!=NULL)&&(access(command->out, W_OK)))
-        {printf("%s: Permission denied \n", command->out);}
 
+        /* Test sur le mode d'acces des fichiers de redirections */
+        if ( (command->out!=NULL)&&(access(command->out, W_OK)) ){
+            printf("%s: Permission denied \n", command->out);
+        }
+
+        /* Exécution d'une commande simple */
         int res = commande(command);
 
+        /* Si la ligne de commande est vide */
         if(res == 1){
             continue;
         }

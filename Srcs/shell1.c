@@ -42,9 +42,10 @@ int main() {
         }
 
         /* Test sur le mode d'acces des fichiers de redirections */
-        if ( (command->out!=NULL)&&(access(command->out, W_OK)) ){
-            printf("%s: Permission denied \n", command->out);
-        }
+        if ( (command->in!=NULL)&&(access(command->in, R_OK) ) != 0)
+            printf("%s: Permission denied in\n", command->in);
+        if ( (command->out!=NULL)&&(access(command->out, W_OK)) )
+            printf("%s: Permission denied out\n", command->out);
 
         /* Exécution d'une commande simple */
         int res = commande(command);

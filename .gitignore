@@ -4,3 +4,4 @@
 /Objs/readcmd.o
 /Objs/shell.o
 /Bin/shell
+*.txt

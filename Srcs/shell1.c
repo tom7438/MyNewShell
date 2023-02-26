@@ -44,13 +44,10 @@ int main() {
         /* Exécution d'une commande simple */
         int res = commande(command);
 
-        /* Si la ligne de commande est vide */
+        /* Si la ligne de commande est vide ou si des fichiers de
+         * redirections sont non accessibles dans le mode nécessaire */
         if(res == 1){
             continue;
         }
-
-        /* Reinitialiser stdin et stdout */
-        Dup2(STDIN_FILENO, STDIN_FILENO);
-        Dup2(STDOUT_FILENO, STDOUT_FILENO);
     }
 }

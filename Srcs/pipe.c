@@ -65,6 +65,9 @@ int Mypipe(struct cmdline * command) {
 
 int commande(struct cmdline * command) {
     /* Commande interne */
+    if(command->seq[0] == NULL) {
+        return 1;
+    }
     if(isCommandeInterne(command->seq[0][0])){
         executeCommandeInterne(command->seq[0][0], command->seq[0]);
     } else {

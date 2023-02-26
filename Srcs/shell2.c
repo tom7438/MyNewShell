@@ -21,7 +21,7 @@ int main() {
         /* Affichage du prompt */
         char *rep=(char *)malloc(sizeof(char)*100);
         printf("\033[%dm", couleur);
-        printf("\033[4mMyShell\033[00m");
+        printf("\033[4mMyShell2\033[00m");
         printf(":");
         if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
             printf("\033[34m~\033[00m");

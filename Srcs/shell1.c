@@ -17,7 +17,7 @@ int main() {
         /* Affichage du prompt */
         char *rep=(char *)malloc(sizeof(char)*100);
         printf("\033[%dm", couleur);
-        printf("\033[4mMyShell\033[00m");
+        printf("\033[4mMyShell1\033[00m");
         printf(":");
         if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
             printf("\033[34m~\033[00m");
@@ -40,12 +40,6 @@ int main() {
             printf("error: %s\n", command->err);
             continue;
         }
-
-        /* Test sur le mode d'acces des fichiers de redirections */
-        if ( (command->in!=NULL)&&(access(command->in, R_OK) ) != 0)
-            printf("%s: Permission denied in\n", command->in);
-        if ( (command->out!=NULL)&&(access(command->out, W_OK)) )
-            printf("%s: Permission denied out\n", command->out);
 
         /* Exécution d'une commande simple */
         int res = commande(command);

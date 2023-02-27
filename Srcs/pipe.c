@@ -22,7 +22,7 @@ int Mypipe(struct cmdline * command) {
         /* Fils */
         if(command->in != NULL){
             if ((access(command->in, R_OK))){
-                printf("%s: Permission denied entré\n", command->out);
+                printf("%s: Permission denied entré\n", command->in);
                 return 1;
             }
             oldin = dup(STDIN_FILENO);
@@ -46,8 +46,8 @@ int Mypipe(struct cmdline * command) {
         if((pid[1] = Fork()) == 0) {
             /* Fils 2 */
             if(command->out != NULL){
-                if ((access(command->out, W_OK))){
-                    printf("%s: Permission denied sortie\n", command->in);
+                if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
+                    printf("%s: Permission denied sortie\n", command->out);
                     return 1;
                 }
                 oldout = dup(STDOUT_FILENO);
@@ -91,7 +91,7 @@ int commande(struct cmdline * command) {
     /* Redirections */
     if(command->in != NULL){
         if ((access(command->in, R_OK))){
-            printf("%s: Permission denied entré\n", command->out);
+            printf("%s: Permission denied entré\n", command->in);
             return 1;
         }
         oldin = dup(STDIN_FILENO);
@@ -100,8 +100,8 @@ int commande(struct cmdline * command) {
         Close(fdin);
     }
     if(command->out != NULL){
-        if ((access(command->out, W_OK))){
-            printf("%s: Permission denied sortie\n", command->in);
+        if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
+            printf("%s: Permission denied sortie\n", command->out);
             return 1;
         }
         oldout = dup(STDOUT_FILENO);

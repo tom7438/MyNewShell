@@ -2,6 +2,15 @@
 // Created by théo on 23/02/23.
 //
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "readcmd.h"
+#include "csapp.h"
+#include "CommandesInternes.h"
+#include "handler.h"
+#include "pipe.h"
+
 int main() {
     int couleur = 31;
     /* Ignore les signaux Ctrl-C et Ctrl-Z */
@@ -13,7 +22,7 @@ int main() {
         /* Affichage du prompt */
         char *rep=(char *)malloc(sizeof(char)*100);
         printf("\033[%dm", couleur);
-        printf("\033[4mMyShell2\033[00m");
+        printf("\033[4mMyShell3\033[00m");
         printf(":");
         if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
             printf("\033[34m~\033[00m");
@@ -50,12 +59,11 @@ int main() {
 
         if(i > 1){
             /* plusieur pipe */
-            Mypipe(command,i);
-        } else if (i == 1){
+            Multipipe(command, i);
+
+        } else{
             /* 1 commande unique */
             commande(command);
-        } else {
-            printf("error: too many commands, not yet implemented\n");
         }
     }
 }

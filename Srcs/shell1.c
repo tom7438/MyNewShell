@@ -10,10 +10,13 @@
 #include "pipe.h"
 
 int main() {
+#ifndef TEST
     int couleur = 31;
+#endif
     while (1) {
         struct cmdline *command;
 
+#ifndef TEST
         /* Affichage du prompt */
         char *rep=(char *)malloc(sizeof(char)*100);
         printf("\033[%dm", couleur);
@@ -26,6 +29,7 @@ int main() {
         }
         printf(" # ");
         if((couleur=(couleur+1-31)%18+31)==34){couleur++;};
+#endif
 
         command = readcmd();
 

@@ -11,4 +11,6 @@ int Mypipe(struct cmdline * command);
 
 int commande(struct cmdline * command);
 
+int resetStdinStdout(int oldin, int oldout);
+
 #endif //MYNEWSHELL_PIPE_H

@@ -22,6 +22,10 @@ ifdef DEBUG
 	CPPFLAGS+=-DDEBUG
 endif
 
+ifdef TEST
+	CPPFLAGS+=-DTEST
+endif
+
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 

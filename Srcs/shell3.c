@@ -9,8 +9,11 @@
 #include "csapp.h"
 #include "CommandesInternes.h"
 #include "pipe.h"
+#include "handler.h"
 
 int main() {
+    /* Handler */
+    Signal(SIGCHLD, sigchld_handler);
     int couleur = 31;
 	while (1) {
 		struct cmdline *command;

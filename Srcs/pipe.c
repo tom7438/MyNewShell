@@ -130,7 +130,6 @@ int Mypipe(struct cmdline * command) {
 }
 
 int Multipipe(struct cmdline * command, int nbrcommande) {
-    fprintf(stderr, "nbrcommande = %d\n", nbrcommande);
     /* plusieurs pipes */
     int num_pipes = nbrcommande-1;
     int pipes[num_pipes][2];
@@ -149,7 +148,6 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
     pid_t pid[nbrcommande];
     int status;
     for (int i = 0; i<nbrcommande; i++){
-        fprintf(stderr, "i = %d\n", i);
         if((pid[i] = Fork()) == 0) {
             /* Fils */
             closePipes(pipes, num_pipes, i);
@@ -192,7 +190,6 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                 exit(0);
             }
             else {
-                fprintf(stderr, "commande externe\n");
                 if(execvp(command->seq[i][0], command->seq[i]) < 0){
                     printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
                     return 1;
@@ -203,11 +200,18 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             return 1;
         } else {
             /* Père */
+            if(i!=0) {
+                Close(pipes[i-1][1]);
+            }
+            if(i>1) {
+                Close(pipes[i-2][0]);
+            }
             Waitpid(pid[i], &status, 0);
-            fprintf(stderr, "pid[%d] = %d terminé\n", i, pid[i]);
+            if(i==nbrcommande-1) {
+                Close(pipes[i-1][0]);
+            }
         }
     }
-    closeAllPipes(pipes, num_pipes);
     resetStdinStdout(oldin, oldout);
     return 0;
 }
@@ -221,24 +225,16 @@ int resetStdinStdout(int oldin, int oldout) {
 }
 
 int closePipes(int pipes[][2], int num_pipes, int numeroCommande) {
-    for (int i = 0; i < num_pipes; i++) {
+    int depart = 0;
+    if(numeroCommande>1)
+        depart = numeroCommande-1;
+    for (int i = depart; i < num_pipes; i++) {
         if(i!=numeroCommande){
             Close(pipes[i][1]);
-            fprintf(stderr, "Fermeture du pipes[%d][1]\n", i);
         }
         if(i!=numeroCommande-1){
             Close(pipes[i][0]);
-            fprintf(stderr, "Fermeture du pipes[%d][0]\n", i);
         }
-    }
-    return 0;
-}
-
-int closeAllPipes(int pipes[][2], int num_pipes) {
-    for (int i = 0; i < num_pipes; i++) {
-        Close(pipes[i][1]);
-        Close(pipes[i][0]);
-        fprintf(stderr, "Fermeture du pipes[%d][1] et pipes[%d][0]\n", i, i);
     }
     return 0;
 }

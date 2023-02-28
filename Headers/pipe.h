@@ -17,4 +17,8 @@ int commande(struct cmdline * command);
 
 int resetStdinStdout(int oldin, int oldout);
 
+int closePipes(int pipes[][2], int num_pipes, int numeroCommande);
+
+int closeAllPipes(int pipes[][2], int num_pipes);
+
 #endif //MYNEWSHELL_PIPE_H

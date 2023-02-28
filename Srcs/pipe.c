@@ -186,7 +186,6 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             // Exécution de la commande
             if(isCommandeInterne(command->seq[i][0])) {
                 executeCommandeInterne(command->seq[i][0], command->seq[0]);
-                fprintf(stderr, "commande interne exécutée\n");
                 exit(0);
             }
             else {

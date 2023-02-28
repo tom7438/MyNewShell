@@ -1,0 +1,13 @@
+#
+# testV1_01.txt - Test de commandes simples avec redirection entrée/sortie
+#
+# 1. Test de la commande ls -l > Test/res.txt
+ls -l > Test/res.txt
+# 2. Test de la commande cat Test/res.txt
+cat Test/res.txt
+# 3. Test de la commande echo < Test/res.txt
+echo < Test/res.txt
+# 4. Test de la commande cat < Test/res.txt
+cat < Test/res.txt
+# Redirection entrée et sortie avec un fichier de sortie non existant
+cat < Test/res.txt > Test/res2.txt

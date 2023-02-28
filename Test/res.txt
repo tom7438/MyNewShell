@@ -1,0 +1,13 @@
+total 52
+drwxrwxr-x 2 tom tom 4096 févr. 27 16:14 Bin
+-rw-r--r-- 1 tom tom  617 févr. 27 16:04 fdegr.txt
+drwxrwxr-x 2 tom tom 4096 févr. 27 15:23 Headers
+-rw-rw-r-- 1 tom tom 1103 févr. 26 22:43 Makefile
+d-wxrwxr-x 2 tom tom 4096 févr. 27 15:17 NonAccessibleLecture
+drwxrwxr-x 2 tom tom 4096 févr. 27 16:14 Objs
+-r--r--r-- 1 tom tom   86 févr. 27 15:56 oui.txt
+-rw-rw-r-- 1 tom tom   12 févr. 23 11:33 README.md
+-rw-r--r-- 1 tom tom   94 févr. 27 16:04 res.txt
+-rwxrw-r-- 1 tom tom 5143 févr. 23 11:33 sdriver.pl
+drwxrwxr-x 2 tom tom 4096 févr. 27 16:05 Srcs
+drwxrwxr-x 2 tom tom 4096 févr. 27 16:14 Test

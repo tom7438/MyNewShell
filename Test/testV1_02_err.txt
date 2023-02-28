@@ -1,0 +1,15 @@
+#
+# testV1_02_err.txt - Test de commandes simples avec redirection entrée/sortie (gestion des erreurs)
+#
+# 1. Test de la commande "cat" avec redirection entrée fichier non existant
+cat < blabla.txt
+# 2. Test de la commande "cat" avec redirection entrée fichier existant mais non accessible en lecture
+cat < NonLecture.txt
+# 3. Test d'affichage d'un répertoire non accessible en lecture
+cd ./Test/DirNonLecture
+pwd
+ls
+cd ../
+pwd
+# 4. Test d'une commande non existante
+dzfegr

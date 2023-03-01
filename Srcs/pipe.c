@@ -7,12 +7,12 @@
 #include "readcmd.h"
 
 int commande(struct cmdline * command) {
-    sigset_t mask_all, mask_one, prev_one;
-    Sigfillset(&mask_all);
-    Sigemptyset(&mask_one);
-    Sigaddset(&mask_one, SIGCHLD);
+    //sigset_t mask_all, mask_one, prev_one;
+    //Sigfillset(&mask_all);
+    //Sigemptyset(&mask_one);
+    //Sigaddset(&mask_one, SIGCHLD);
     //initjobs(); /* Initialize the job list */
-    Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
+    //Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
 
     if(command->seq[0] == NULL) {
         return 1;
@@ -50,7 +50,7 @@ int commande(struct cmdline * command) {
         pid_t pid;
         int status;
         if((pid = Fork()) == 0){
-            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
+            //Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[0][0], command->seq[0]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
                 return 1;
@@ -59,9 +59,9 @@ int commande(struct cmdline * command) {
         if(command->background == 0)
             Waitpid(pid, &status, 0);
     }
-    Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
+    //Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
     //addjob(pid[i]); /* Add the child to the job list */
-    Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
+    //Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
     resetStdinStdout(oldin, oldout);
     return 0;
 }
@@ -140,12 +140,12 @@ int Mypipe(struct cmdline * command) {
 }
 
 int Multipipe(struct cmdline * command, int nbrcommande) {
-    sigset_t mask_all, mask_one, prev_one;
-    Sigfillset(&mask_all);
-    Sigemptyset(&mask_one);
-    Sigaddset(&mask_one, SIGCHLD);
+    //sigset_t mask_all, mask_one, prev_one;
+    //Sigfillset(&mask_all);
+    //Sigemptyset(&mask_one);
+    //Sigaddset(&mask_one, SIGCHLD);
     //initjobs(); /* Initialize the job list */
-    Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
+    //Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
 
     /* Plusieurs commandes avec plusieurs pipes */
     int num_pipes = nbrcommande-1;
@@ -201,7 +201,7 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                 Close(pipes[i-1][0]);
             }
             // Exécution de la commande
-            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
+            //Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(isCommandeInterne(command->seq[i][0])) {
                 executeCommandeInterne(command->seq[i][0], command->seq[0]);
                 exit(0);
@@ -230,9 +230,9 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             }
         }
     }
-    Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
+    //Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
     //addjob(pid[i]); /* Add the child to the job list */
-    Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
+    //Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
     resetStdinStdout(oldin, oldout);
     return 0;
 }

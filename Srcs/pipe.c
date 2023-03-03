@@ -50,8 +50,8 @@ int commande(struct cmdline * command) {
         }
         /* Père */
         /* Ajout du job */
-        Status status = command->background ? BACKGROUND : FOREGROUND;
-        addJob(pid, command->seq[0], status);
+        Mode mode = command->background ? BACKGROUND : FOREGROUND;
+        addJob(pid, command->seq[0], mode);
         /* Attente de la fin des processus en foreground */
         while(nombreForeground() > 0) {
             Sleep(1);
@@ -62,6 +62,7 @@ int commande(struct cmdline * command) {
 
 
 int Mypipe(struct cmdline * command) {
+    // TODO : Gérer les jobs
     /* 2 commandes avec un pipe */
     int fd[2];
     pipe(fd);
@@ -69,9 +70,10 @@ int Mypipe(struct cmdline * command) {
     pid_t pid[2];
     int status;
 
-    /* Permet de rétablir stdin et stdout */
-    int oldin = -1;
-    int oldout = -1;
+    if(isCommandeInterne(command->seq[0][0]) || isCommandeInterne(command->seq[1][0])) {
+        fprintf(stderr, "Commande interne dans un pipe non supportée\n");
+        exit(EXIT_FAILURE);
+    }
 
     if((pid[0] = Fork()) == 0) {
         /* Fils */
@@ -88,10 +90,7 @@ int Mypipe(struct cmdline * command) {
         Dup2(fd[1], STDOUT_FILENO);
         Close(fd[0]);
         Close(fd[1]);
-        if(isCommandeInterne(command->seq[0][0])) {
-            executeCommandeInterne(command->seq[0][0], command->seq[0]);
-            exit(0);
-        } else if(execvp(command->seq[0][0], command->seq[0]) < 0){
+        if(execvp(command->seq[0][0], command->seq[0]) < 0){
             printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
             return 1;
         }
@@ -129,7 +128,6 @@ int Mypipe(struct cmdline * command) {
             Waitpid(pid[1], &status, 0);
         }
     }
-    resetStdinStdout(oldin, oldout);
     return 0;
 }
 
@@ -146,12 +144,14 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
         }
     }
 
-    int oldin = -1;
-    int oldout = -1;
-
+    /* Tableau des pid des fils */
     pid_t pid[nbrcommande];
-    int status;
+
     for (int i = 0; i<nbrcommande; i++){
+        if(isCommandeInterne(command->seq[i][0])) {
+            fprintf(stderr, "Commande interne non supportée avec plusieurs pipes\n");
+            exit(EXIT_FAILURE);
+        }
         if((pid[i] = Fork()) == 0) {
             /* Fils */
             closePipes(pipes, num_pipes, i);
@@ -161,7 +161,6 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                         printf("%s: Permission denied entré\n", command->in);
                         return 1;
                     }
-                    oldin = dup(STDIN_FILENO);
                     int fd_in = Open(command->in, O_RDONLY, 0);
                     Dup2(fd_in, STDIN_FILENO);
                     Close(fd_in);
@@ -173,7 +172,6 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                         printf("%s: Permission denied sortie\n", command->out);
                         return 1;
                     }
-                    oldout = dup(STDOUT_FILENO);
                     int fd_out = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                     Dup2(fd_out, STDOUT_FILENO);
                     Close(fd_out);
@@ -188,42 +186,36 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                 Close(pipes[i-1][0]);
             }
             // Exécution de la commande
-            if(isCommandeInterne(command->seq[i][0])) {
-                executeCommandeInterne(command->seq[i][0], command->seq[0]);
-                exit(0);
-            }
-            else {
-                if(execvp(command->seq[i][0], command->seq[i]) < 0){
-                    printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
-                    return 1;
-                }
+            if(execvp(command->seq[i][0], command->seq[i]) < 0){
+                printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
+                return 1;
             }
         } else if (pid[i] < 0) {
             perror("Erreur lors du fork");
             return 1;
         } else {
             /* Père */
+            /* Ajout du job */
+            Mode mode = command->background ? BACKGROUND : FOREGROUND;
+#ifdef DEBUG
+            fprintf(stderr, "Ajout du job %d (%s) en %s\n", pid[i], command->seq[i][0], mode == BACKGROUND ? "BACKGROUND" : "FOREGROUND");
+#endif
+            addJob(pid[i], command->seq[i], mode);
             if(i!=0) {
                 Close(pipes[i-1][1]);
             }
             if(i>1) {
                 Close(pipes[i-2][0]);
             }
-            Waitpid(pid[i], &status, 0);
             if(i==nbrcommande-1) {
                 Close(pipes[i-1][0]);
             }
+            /* Attente de la fin des processus en foreground */
+            while(nombreForeground() > 0) {
+                Sleep(1);
+            }
         }
     }
-    resetStdinStdout(oldin, oldout);
-    return 0;
-}
-
-int resetStdinStdout(int oldin, int oldout) {
-    if(oldin!=-1)
-        Dup2(oldin, STDIN_FILENO);
-    if(oldout!=-1)
-        Dup2(oldout, STDOUT_FILENO);
     return 0;
 }
 

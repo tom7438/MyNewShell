@@ -29,6 +29,7 @@ int initJobs() {
 
 int joinCmd(char *cmd, char **seq) {
     int i = 0;
+    cmd[0] = '\0';
     while (seq[i] != NULL) {
         if(i != 0)
             strcat(cmd, " ");

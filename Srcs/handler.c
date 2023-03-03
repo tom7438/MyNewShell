@@ -35,7 +35,9 @@ void sigchld_handler(int sig) {
         //Sigprocmask(SIG_SETMASK, &prev_all, NULL);
 
     }
+    /*
     if (errno != ECHILD)
         Sio_error("waitpid error");
+        */
     errno = olderrno;
 }

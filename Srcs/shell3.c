@@ -57,5 +57,7 @@ int main() {
             /* 1 commande unique */
             commande(command);
         }
+        /* Libérer la mémoire */
+        free(rep);
     }
 }

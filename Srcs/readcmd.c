@@ -178,7 +178,7 @@ struct cmdline *readcmd(void)
 	seq_len = 0;
 
 	words = split_in_words(line);
-	free(line);
+    free(line);
 
 	if (!s)
 		static_cmdline = s = xmalloc(sizeof(struct cmdline));

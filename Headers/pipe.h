@@ -7,15 +7,11 @@
 
 #include "readcmd.h"
 
-int resetStdinStdout(int oldin, int oldout);
-
 int Mypipe(struct cmdline * command);
 
 int Multipipe(struct cmdline * command, int nbrcommande);
 
 int commande(struct cmdline * command);
-
-int resetStdinStdout(int oldin, int oldout);
 
 int closePipes(int pipes[][2], int num_pipes, int numeroCommande);
 

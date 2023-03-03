@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "csapp.h"
 
-char CommandesInternes[5][10]={"pwd", "cd", "echo", "quit", "exit"};
+char CommandesInternes[3][10]={"cd", "quit", "exit"};
 
 int isCommandeInterne(char *cmd){
     int i;
@@ -30,28 +30,14 @@ int executeCommandeInterne(char *cmd, char **args){
         tmp++;
     }
 #endif
-    if(!strcmp(cmd, "pwd")){
-        return pwd();
-    }
-    else if(!strcmp(cmd, "cd")){
+    if(!strcmp(cmd, "cd")){
         cd(args[1]);
-    }
-    else if(!strcmp(cmd, "echo")){
-        return echo(args);
     }
     else if(!strcmp(cmd, "quit") || !strcmp(cmd, "exit")){
         return quit();
     } else {
         fprintf(stderr, "Commande interne non reconnue: %s\n", cmd);
     }
-    return 0;
-}
-
-int pwd(){
-#ifdef DEBUG
-    fprintf(stderr, "pwd called\n");
-#endif
-    printf("%s\n", getenv("PWD"));
     return 0;
 }
 
@@ -107,22 +93,6 @@ int cd(char *directory){
         exit(EXIT_FAILURE);
     }
     return 0;
-}
-
-int echo(char **args){
-#ifdef DEBUG
-    fprintf(stderr, "echo: %s\n", args[1]);
-#endif
-    int i=1;
-    while(args[i] != NULL){
-        if(i != 1) {
-            printf(" ");
-        }
-        printf("%s", args[i]);
-        i++;
-    }
-    printf("\n");
-    return 1;
 }
 
 int quit(){

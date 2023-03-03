@@ -231,6 +231,9 @@ struct cmdline *readcmd(void)
 			cmd[0] = 0;
 			cmd_len = 0;
 			break;
+        case '&':
+            s->background = 1;
+            break;
 		default:
 			cmd = xrealloc(cmd, (cmd_len + 2) * sizeof(char *));
 			cmd[cmd_len++] = w;
@@ -257,6 +260,7 @@ error:
 		case '<':
 		case '>':
 		case '|':
+        case '&':
 			break;
 		default:
 			free(w);

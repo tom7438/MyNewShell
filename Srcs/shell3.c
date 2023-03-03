@@ -9,8 +9,12 @@
 #include "csapp.h"
 #include "CommandesInternes.h"
 #include "pipe.h"
+#include "jobs.h"
+#include "handler.h"
 
 int main() {
+    initJobs();
+    Signal(SIGCHLD, sigchld_handler);
     int couleur = 31;
 	while (1) {
 		struct cmdline *command;
@@ -54,5 +58,6 @@ int main() {
             /* 1 commande unique */
             commande(command);
         }
+        printAllJobs();
     }
 }

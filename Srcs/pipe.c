@@ -5,6 +5,11 @@
 #include "csapp.h"
 #include "CommandesInternes.h"
 #include "readcmd.h"
+#include "handler.h"
+#include "jobs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int commande(struct cmdline * command) {
     /* Commande interne */
@@ -12,47 +17,46 @@ int commande(struct cmdline * command) {
         return 1;
     }
 
-    /* Permet de rétablir stdin et stdout */
-    int oldin = -1;
-    int oldout = -1;
-
     /* Redirections */
-    if(command->in != NULL){
-        if ((access(command->in, R_OK))){
-            printf("%s: Permission denied entré\n", command->in);
-            return 1;
-        }
-        oldin = dup(STDIN_FILENO);
-        int fdin = Open(command->in, O_RDONLY, 0);
-        Dup2(fdin, STDIN_FILENO);
-        Close(fdin);
-    }
-    if(command->out != NULL){
-        if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
-            printf("%s: Permission denied sortie\n", command->out);
-            return 1;
-        }
-        oldout = dup(STDOUT_FILENO);
-        int fdout = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        Dup2(fdout, STDOUT_FILENO);
-        Close(fdout);
-    }
     if(isCommandeInterne(command->seq[0][0])){
         executeCommandeInterne(command->seq[0][0], command->seq[0]);
     } else {
+        if(command->in != NULL){
+            if ((access(command->in, R_OK))){
+                printf("%s: Permission denied entré\n", command->in);
+                return 1;
+            }
+            int fdin = Open(command->in, O_RDONLY, 0);
+            Dup2(fdin, STDIN_FILENO);
+            Close(fdin);
+        }
+        if(command->out != NULL){
+            if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
+                printf("%s: Permission denied sortie\n", command->out);
+                return 1;
+            }
+            int fdout = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            Dup2(fdout, STDOUT_FILENO);
+            Close(fdout);
+        }
         /* Commande externe */
         pid_t pid;
-        int status;
         if((pid = Fork()) == 0){
+            /* Fils */
             if(execvp(command->seq[0][0], command->seq[0]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
                 return 1;
             }
         }
-        Waitpid(pid, &status, 0);
+        /* Père */
+        /* Ajout du job */
+        Status status = command->background ? BACKGROUND : FOREGROUND;
+        addJob(pid, command->seq[0], status);
+        /* Attente de la fin des processus en foreground */
+        while(nombreForeground() > 0) {
+            Sleep(1);
+        }
     }
-    /* Reinitialiser stdin et stdout */
-    resetStdinStdout(oldin, oldout);
     return 0;
 }
 

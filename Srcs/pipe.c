@@ -62,13 +62,11 @@ int commande(struct cmdline * command) {
 
 
 int Mypipe(struct cmdline * command) {
-    // TODO : Gérer les jobs
     /* 2 commandes avec un pipe */
     int fd[2];
     pipe(fd);
 
     pid_t pid[2];
-    int status;
 
     if(isCommandeInterne(command->seq[0][0]) || isCommandeInterne(command->seq[1][0])) {
         fprintf(stderr, "Commande interne dans un pipe non supportée\n");
@@ -82,7 +80,6 @@ int Mypipe(struct cmdline * command) {
                 printf("%s: Permission denied entré\n", command->in);
                 return 1;
             }
-            oldin = dup(STDIN_FILENO);
             int fd_in = Open(command->in, O_RDONLY, 0);
             Dup2(fd_in, STDIN_FILENO);
             Close(fd_in);
@@ -104,7 +101,6 @@ int Mypipe(struct cmdline * command) {
                     printf("%s: Permission denied sortie\n", command->out);
                     return 1;
                 }
-                oldout = dup(STDOUT_FILENO);
                 int fd_out = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 Dup2(fd_out, STDOUT_FILENO);
                 Close(fd_out);
@@ -112,20 +108,23 @@ int Mypipe(struct cmdline * command) {
             Dup2(fd[0], STDIN_FILENO);
             Close(fd[0]);
             Close(fd[1]);
-            if(isCommandeInterne(command->seq[1][0])) {
-                executeCommandeInterne(command->seq[1][0], command->seq[1]);
-                exit(0);
-            } else if(execvp(command->seq[1][0], command->seq[1]) < 0){
+            if(execvp(command->seq[1][0], command->seq[1]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[1][0]);
                 return 1;
             }
         }
         else {
             /* Pere */
+            /* Ajout du job */
+            Mode mode = command->background ? BACKGROUND : FOREGROUND;
+            addJob(pid[0], command->seq[0], mode);
+            addJob(pid[1], command->seq[1], mode);
             Close(fd[0]);
             Close(fd[1]);
-            Waitpid(pid[0], &status, 0);
-            Waitpid(pid[1], &status, 0);
+            /* Attente de la fin des processus en foreground */
+            while(nombreForeground() > 0) {
+                Sleep(1);
+            }
         }
     }
     return 0;

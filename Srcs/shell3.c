@@ -58,6 +58,8 @@ int main() {
             /* 1 commande unique */
             commande(command);
         }
+#ifdef DEBUG
         printAllJobs();
+#endif
     }
 }

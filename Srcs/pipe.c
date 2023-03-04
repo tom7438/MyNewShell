@@ -57,6 +57,8 @@ int commande(struct cmdline * command) {
             }
         }
         /* Père */
+        /* Changement gpid */
+        Setpgid(pid, pid);
         /* Ajout du job */
         Mode mode = command->background ? BACKGROUND : FOREGROUND;
         Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
@@ -113,6 +115,8 @@ int Mypipe(struct cmdline * command) {
     }
     else {
         /* Pere */
+        /* Changement gpid */
+        Setpgid(pid[0], pid[0]);
         if((pid[1] = Fork()) == 0) {
             /* Fils 2 */
             if(command->out != NULL){
@@ -135,6 +139,8 @@ int Mypipe(struct cmdline * command) {
         }
         else {
             /* Pere */
+            /* Changement gpid */
+            Setpgid(pid[1], pid[0]);
             /* Ajout du job */
             Mode mode = command->background ? BACKGROUND : FOREGROUND;
             Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
@@ -224,6 +230,8 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             return 1;
         } else {
             /* Père */
+            /* Changement gpid */
+            Setpgid(pid[i], pid[0]);
             /* Ajout du job */
             Mode mode = command->background ? BACKGROUND : FOREGROUND;
 #ifdef DEBUG

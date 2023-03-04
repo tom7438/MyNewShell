@@ -14,14 +14,13 @@ void sigint_handler(int sig) {
 
 void sigchld_handler(int sig) {
     int olderrno = errno;
-    //sigset_t mask_all, prev_all;
+    sigset_t mask_all, prev_all;
     pid_t pid;
     int status;
-    //Sigfillset(&mask_all);
+    Sigfillset(&mask_all);
     while ((pid = waitpid(-1, &status, WNOHANG|WUNTRACED)) > 0) { // Reap child
-        //Sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
+        Sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
         if(WIFEXITED(status)){
-            printf("Job [%d] (%d) terminé avec le code %d\n", numeroJob(pid), pid, WEXITSTATUS(status));
             deletejob(pid); // Delete the child from the job list
         }
         else if(WIFSIGNALED(status)){
@@ -32,7 +31,7 @@ void sigchld_handler(int sig) {
             printf("Job [%d] (%d) suspendu par le signal %d\n", numeroJob(pid), pid, WSTOPSIG(status));
             updateJobPid(pid, SUSPENDU, getJobPid(pid)->mode);
         }
-        //Sigprocmask(SIG_SETMASK, &prev_all, NULL);
+        Sigprocmask(SIG_SETMASK, &prev_all, NULL);
 
     }
     /*

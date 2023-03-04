@@ -12,6 +12,12 @@
 #include <string.h>
 
 int commande(struct cmdline * command) {
+    /* Masques pour les signaux */
+    sigset_t mask_all, mask_one, prev_one;
+    Sigfillset(&mask_all);
+    Sigemptyset(&mask_one);
+    Sigaddset(&mask_one, SIGCHLD);
+
     /* Commande interne */
     if(command->seq[0] == NULL) {
         return 1;
@@ -41,8 +47,10 @@ int commande(struct cmdline * command) {
         }
         /* Commande externe */
         pid_t pid;
+        Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
         if((pid = Fork()) == 0){
             /* Fils */
+            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[0][0], command->seq[0]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
                 return 1;
@@ -51,7 +59,9 @@ int commande(struct cmdline * command) {
         /* Père */
         /* Ajout du job */
         Mode mode = command->background ? BACKGROUND : FOREGROUND;
+        Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
         addJob(pid, command->seq[0], mode);
+        Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
         /* Attente de la fin des processus en foreground */
         while(nombreForeground() > 0) {
             Sleep(1);
@@ -62,6 +72,12 @@ int commande(struct cmdline * command) {
 
 
 int Mypipe(struct cmdline * command) {
+    /* Masques pour les signaux */
+    sigset_t mask_all, mask_one, prev_one;
+    Sigfillset(&mask_all);
+    Sigemptyset(&mask_one);
+    Sigaddset(&mask_one, SIGCHLD);
+
     /* 2 commandes avec un pipe */
     int fd[2];
     pipe(fd);
@@ -72,6 +88,8 @@ int Mypipe(struct cmdline * command) {
         fprintf(stderr, "Commande interne dans un pipe non supportée\n");
         exit(EXIT_FAILURE);
     }
+
+    Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
 
     if((pid[0] = Fork()) == 0) {
         /* Fils */
@@ -87,6 +105,7 @@ int Mypipe(struct cmdline * command) {
         Dup2(fd[1], STDOUT_FILENO);
         Close(fd[0]);
         Close(fd[1]);
+        Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
         if(execvp(command->seq[0][0], command->seq[0]) < 0){
             printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
             return 1;
@@ -108,6 +127,7 @@ int Mypipe(struct cmdline * command) {
             Dup2(fd[0], STDIN_FILENO);
             Close(fd[0]);
             Close(fd[1]);
+            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[1][0], command->seq[1]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[1][0]);
                 return 1;
@@ -117,8 +137,10 @@ int Mypipe(struct cmdline * command) {
             /* Pere */
             /* Ajout du job */
             Mode mode = command->background ? BACKGROUND : FOREGROUND;
+            Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
             addJob(pid[0], command->seq[0], mode);
             addJob(pid[1], command->seq[1], mode);
+            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             Close(fd[0]);
             Close(fd[1]);
             /* Attente de la fin des processus en foreground */
@@ -131,6 +153,12 @@ int Mypipe(struct cmdline * command) {
 }
 
 int Multipipe(struct cmdline * command, int nbrcommande) {
+    /* Masques pour les signaux */
+    sigset_t mask_all, mask_one, prev_one;
+    Sigfillset(&mask_all);
+    Sigemptyset(&mask_one);
+    Sigaddset(&mask_one, SIGCHLD);
+
     /* plusieurs pipes */
     int num_pipes = nbrcommande-1;
     int pipes[num_pipes][2];
@@ -151,6 +179,7 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             fprintf(stderr, "Commande interne non supportée avec plusieurs pipes\n");
             exit(EXIT_FAILURE);
         }
+        Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
         if((pid[i] = Fork()) == 0) {
             /* Fils */
             closePipes(pipes, num_pipes, i);
@@ -185,6 +214,7 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                 Close(pipes[i-1][0]);
             }
             // Exécution de la commande
+            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[i][0], command->seq[i]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
                 return 1;
@@ -199,7 +229,9 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
 #ifdef DEBUG
             fprintf(stderr, "Ajout du job %d (%s) en %s\n", pid[i], command->seq[i][0], mode == BACKGROUND ? "BACKGROUND" : "FOREGROUND");
 #endif
+            Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
             addJob(pid[i], command->seq[i], mode);
+            Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(i!=0) {
                 Close(pipes[i-1][1]);
             }

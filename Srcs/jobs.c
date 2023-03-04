@@ -55,6 +55,8 @@ int addJob(pid_t pid, char **seq, Mode mode) {
     jobs[i].status = EN_COURS;
     jobs[i].mode = mode;
     strcpy(jobs[i].commande, cmd);
+    if(jobs[i].mode == BACKGROUND)
+        printf("[%d] %d %s\n", jobs[i].numero, jobs[i].pid, jobs[i].commande);
     return 0;
 }
 
@@ -142,11 +144,16 @@ int deletejob(pid_t pid) {
         fprintf(stderr, "deletejob(): Processus %d introuvable\n", pid);
         return -1;
     }
+    char tmp[MAXLINE];
+    Mode mode = jobs[i-1].mode;
+    strcpy(tmp, jobs[i-1].commande);
     jobs[i-1].pid = 0;
     jobs[i-1].numero = 0;
     jobs[i-1].status = TERMINE;
     jobs[i-1].commande[0] = '\0';
     jobs[i-1].mode = LIBRE;
+    if(mode == BACKGROUND)
+        fprintf(stdout, "[%d]+\tDone\t%s\n", i, tmp);
     return 0;
 }
 

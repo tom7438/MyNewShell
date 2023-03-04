@@ -193,3 +193,99 @@ int stopJobsForeground() {
     }
     return 0;
 }
+
+int fg(char *num) {
+    int numero = atoi(num);
+    numero--;
+    pid_t ppid = getpgid(jobs[numero].pid);
+    if (jobs[numero].pid != 0 && jobs[numero].status == SUSPENDU && jobs[numero].mode == BACKGROUND) {
+        Kill(-jobs[numero].pid, SIGCONT);
+    }
+    int i = numero;
+    while(i < MAXJOBS) {
+        if (jobs[i].pid != 0 && getpgid(jobs[i].pid) == ppid && jobs[i].status == SUSPENDU && jobs[i].mode == BACKGROUND) {
+            jobs[i].status = EN_COURS;
+            jobs[i].mode = FOREGROUND;
+            fprintf(stdout, "[%d]+\tContinued\t%s\n", jobs[i].numero, jobs[i].commande);
+        }
+        i++;
+    }
+    return 0;
+}
+
+int bg(char *num) {
+    int numero = atoi(num);
+    numero--;
+    pid_t ppid = getpgid(jobs[numero].pid);
+    if (jobs[numero].pid != 0 && jobs[numero].status == SUSPENDU && jobs[numero].mode == BACKGROUND) {
+        Kill(-jobs[numero].pid, SIGCONT);
+    }
+    int i = numero;
+    while(i < MAXJOBS) {
+        if (jobs[i].pid != 0 && getpgid(jobs[i].pid) == ppid && jobs[i].status == SUSPENDU && jobs[i].mode == BACKGROUND) {
+            jobs[i].status = EN_COURS;
+            jobs[i].mode = BACKGROUND;
+            fprintf(stdout, "[%d]+\tContinued\t%s\n", jobs[i].numero, jobs[i].commande);
+        }
+        i++;
+    }
+    return 0;
+}
+
+int Jobs() {
+    char *status;
+    char *mode;
+    for (int i = 0; i < MAXJOBS; i++) {
+        if (jobs[i].pid != 0) {
+            switch (jobs[i].status) {
+                case EN_COURS:
+                    status = "En cours";
+                    break;
+                case TERMINE:
+                    status = "Terminé";
+                    break;
+                case SUSPENDU:
+                    status = "Suspendu";
+                    break;
+                default:
+                    status = "Inconnu";
+                    break;
+            }
+            switch (jobs[i].mode) {
+                case FOREGROUND:
+                    mode = "Foreground";
+                    break;
+                case BACKGROUND:
+                    mode = "Background";
+                    break;
+                case LIBRE:
+                    mode = "Libre";
+                    break;
+                default:
+                    mode = "Inconnu";
+                    break;
+            }
+            printf("[%d] %d %s %s %s\n", jobs[i].numero, jobs[i].pid, status, jobs[i].commande, mode);
+        }
+    }
+    return 0;
+}
+
+
+int stop(char *num) {
+    int numero = atoi(num);
+    numero--;
+    pid_t ppid = getpgid(jobs[numero].pid);
+    if (jobs[numero].pid != 0 && jobs[numero].status == EN_COURS && jobs[numero].mode == BACKGROUND) {
+        Kill(-jobs[numero].pid, SIGSTOP);
+    }
+    int i = numero;
+    while(i < MAXJOBS) {
+        if (jobs[i].pid != 0 && getpgid(jobs[i].pid) == ppid && jobs[i].status == EN_COURS && jobs[i].mode == BACKGROUND) {
+            jobs[i].status = SUSPENDU;
+            fprintf(stdout, "[%d]+\tStopped\t%s\n", jobs[i].numero, jobs[i].commande);
+        }
+        i++;
+    }
+    return 0;
+}

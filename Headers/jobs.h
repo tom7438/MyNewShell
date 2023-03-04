@@ -51,4 +51,12 @@ int killJobsForeground();
 
 int stopJobsForeground();
 
+int fg(char *num);
+
+int bg(char *num);
+
+int Jobs();
+
+int stop(char *num);
+
 #endif //MYNEWSHELL_JOBS_H

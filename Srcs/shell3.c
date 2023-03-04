@@ -11,12 +11,15 @@
 #include "pipe.h"
 #include "jobs.h"
 #include "handler.h"
+#include <termios.h>
 
 int main() {
     initJobs();
+    /* Affectation des traitant de signaux */
     Signal(SIGCHLD, sigchld_handler);
     Signal(SIGINT, sigint_handler);
     Signal(SIGTSTP, sigtstp_handler);
+
     int couleur = 31;
 	while (1) {
 		struct cmdline *command;
@@ -53,6 +56,12 @@ int main() {
             i++;
         }
 
+        /* Désactivation de l'affichage des séquences d'échappement (^C et ^Z) */
+        struct termios term;
+        tcgetattr(STDIN_FILENO, &term);
+        term.c_lflag &= ~ECHO;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+
         if(i > 1){
             /* Plusieurs pipes */
             Multipipe(command, i);
@@ -60,6 +69,11 @@ int main() {
             /* 1 commande unique */
             commande(command);
         }
+
+        /* Réactivation de l'affichage des séquences d'échappement */
+        term.c_lflag |= ECHO;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+
 #ifdef DEBUG
         printAllJobs();
 #endif

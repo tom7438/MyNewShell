@@ -53,7 +53,7 @@ int commande(struct cmdline * command) {
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[0][0], command->seq[0]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
-                return 1;
+                exit(1);
             }
         }
         /* Père */
@@ -64,10 +64,10 @@ int commande(struct cmdline * command) {
         Sigprocmask(SIG_BLOCK, &mask_all, NULL); /* Parent process */
         addJob(pid, command->seq[0], mode);
         Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
-        /* Attente de la fin des processus en foreground */
-        while(nombreForeground() > 0) {
-            Sleep(1);
-        }
+    }
+    /* Attente de la fin des processus en foreground */
+    while(nombreForeground() > 0) {
+        Sleep(1);
     }
     return 0;
 }
@@ -110,7 +110,7 @@ int Mypipe(struct cmdline * command) {
         Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
         if(execvp(command->seq[0][0], command->seq[0]) < 0){
             printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
-            return 1;
+            exit(1);
         }
     }
     else {
@@ -134,7 +134,7 @@ int Mypipe(struct cmdline * command) {
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[1][0], command->seq[1]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[1][0]);
-                return 1;
+                exit(1);
             }
         }
         else {
@@ -223,7 +223,7 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[i][0], command->seq[i]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
-                return 1;
+                exit(1);
             }
         } else if (pid[i] < 0) {
             perror("Erreur lors du fork");

@@ -7,12 +7,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "csapp.h"
+#include <limits.h>
+#include "jobs.h"
 
-char CommandesInternes[5][10]={"pwd", "cd", "echo", "quit", "exit"};
+char CommandesInternes[9][10]={"pwd", "cd", "echo", "quit", "exit", "fg", "bg", "jobs", "stop"};
 
 int isCommandeInterne(char *cmd){
     int i;
-    for(i=0; i<5; i++){
+    for(i=0; i<9; i++){
         if(!strcmp(cmd, CommandesInternes[i])){
             return 1;
         }
@@ -41,8 +43,29 @@ int executeCommandeInterne(char *cmd, char **args){
     }
     else if(!strcmp(cmd, "quit") || !strcmp(cmd, "exit")){
         return quit();
+    } else if (!strcmp(cmd, "fg")) {
+        if(args[1] == NULL) {
+            fprintf(stderr, "fg: argument manquant (n°job)\n");
+            return -1;
+        }
+        return fg(args[1]);
+    } else if (!strcmp(cmd, "bg")) {
+        if(args[1] == NULL) {
+            fprintf(stderr, "bg: argument manquant (n°job)\n");
+            return -1;
+        }
+        return bg(args[1]);
+    } else if (!strcmp(cmd, "jobs")) {
+        return Jobs();
+    } else if (!strcmp(cmd, "stop")) {
+        if(args[1] == NULL) {
+            fprintf(stderr, "stop: argument manquant (n°job)\n");
+            return -1;
+        }
+        return stop(args[1]);
     } else {
         fprintf(stderr, "Commande interne non reconnue: %s\n", cmd);
+        return -1;
     }
     return 0;
 }

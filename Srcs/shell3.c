@@ -15,6 +15,8 @@
 int main() {
     initJobs();
     Signal(SIGCHLD, sigchld_handler);
+    Signal(SIGINT, sigint_handler);
+    Signal(SIGTSTP, sigtstp_handler);
     int couleur = 31;
 	while (1) {
 		struct cmdline *command;

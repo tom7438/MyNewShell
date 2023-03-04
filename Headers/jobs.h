@@ -47,4 +47,8 @@ int deletejob(pid_t pid);
 
 int nombreForeground();
 
+int killJobsForeground();
+
+int stopJobsForeground();
+
 #endif //MYNEWSHELL_JOBS_H

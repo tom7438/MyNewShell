@@ -168,3 +168,28 @@ int nombreForeground() {
     }
     return nb;
 }
+
+int killJobsForeground() {
+    int i = 0;
+    while (i < MAXJOBS) {
+        if (jobs[i].pid != 0 && jobs[i].status == EN_COURS && jobs[i].mode == FOREGROUND) {
+            Kill(jobs[i].pid, SIGTERM);
+        }
+        i++;
+    }
+    return 0;
+}
+
+int stopJobsForeground() {
+    int i = 0;
+    while (i < MAXJOBS) {
+        if (jobs[i].pid != 0 && jobs[i].status == EN_COURS && jobs[i].mode == FOREGROUND) {
+            Kill(-jobs[i].pid, SIGSTOP);
+            jobs[i].status = SUSPENDU;
+            jobs[i].mode = BACKGROUND;
+            fprintf(stdout, "[%d]+\tStopped\t%s\n", jobs[i].numero, jobs[i].commande);
+        }
+        i++;
+    }
+    return 0;
+}

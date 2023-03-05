@@ -61,7 +61,7 @@ int executeCommandeInterne(char *cmd, char **args){
         }
         return bg(args[1]);
     } else if (!strcmp(cmd, "jobs")) {
-        return Jobs();
+        return printAllJobs();
     } else if (!strcmp(cmd, "stop")) {
         if(args[1] == NULL) {
             fprintf(stderr, "stop: argument manquant (n°job)\n");

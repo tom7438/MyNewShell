@@ -10,10 +10,15 @@
 
 void sigint_handler(int sig) {
     int olderrno = errno;
+    /* Bloque tous les signaux */
     sigset_t mask_all, prev_all;
     Sigfillset(&mask_all);
     Sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
+    /* Kill all jobs in foreground */
+    /* Section critique */
     killJobsForeground();
+    /* Fin section critique */
+    /* Débloque tous les signaux */
     Sigprocmask(SIG_SETMASK, &prev_all, NULL);
     errno = olderrno;
 }
@@ -25,7 +30,9 @@ void sigchld_handler(int sig) {
     int status;
     Sigfillset(&mask_all);
     while ((pid = waitpid(-1, &status, WNOHANG|WUNTRACED)) > 0) { // Reap child
+        /* Bloque tous les signaux */
         Sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
+        /* Section critique */
         if(WIFEXITED(status)){
             deletejob(pid); // Delete the child from the job list
         }
@@ -41,21 +48,24 @@ void sigchld_handler(int sig) {
 #endif
             updateJobPid(pid, SUSPENDU, getJobPid(pid)->mode);
         }
+        /* Fin section critique */
+        /* Débloque tous les signaux */
         Sigprocmask(SIG_SETMASK, &prev_all, NULL);
     }
-    /*
-    if (errno != ECHILD)
-        Sio_error("waitpid error");
-    */
     errno = olderrno;
 }
 
 void sigtstp_handler(int sig) {
     int olderrno = errno;
+    /* Bloque tous les signaux */
     sigset_t mask_all, prev_all;
     Sigfillset(&mask_all);
     Sigprocmask(SIG_BLOCK, &mask_all, &prev_all);
+    /* Section critique */
+    /* Stop tous les jobs en foreground */
     stopJobsForeground();
+    /* Fin section critique */
+    /* Débloque tous les signaux */
     Sigprocmask(SIG_SETMASK, &prev_all, NULL);
     errno = olderrno;
 }

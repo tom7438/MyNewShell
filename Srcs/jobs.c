@@ -57,6 +57,9 @@ int addJob(pid_t pid, char **seq, Mode mode) {
     strcpy(jobs[i].commande, cmd);
     if(jobs[i].mode == BACKGROUND)
         printf("[%d] %d %s\n", jobs[i].numero, jobs[i].pid, jobs[i].commande);
+#ifdef DEBUG
+    printf("addJob(): Job %d ajouté pid = %d, cmd = %s\n", jobs[i].numero, jobs[i].pid, jobs[i].commande);
+#endif
     return 0;
 }
 
@@ -182,15 +185,21 @@ int killJobsForeground() {
 
 int stopJobsForeground() {
     int i = 0;
+    int signal = 0;
+    printAllJobs();
     while (i < MAXJOBS) {
         if (jobs[i].pid != 0 && jobs[i].status == EN_COURS && jobs[i].mode == FOREGROUND) {
-            Kill(-jobs[i].pid, SIGSTOP);
+            if(!signal) {
+                Kill(-jobs[i].pid, SIGSTOP);
+                signal = 1;
+            }
             jobs[i].status = SUSPENDU;
             jobs[i].mode = BACKGROUND;
             fprintf(stdout, "[%d]+\tStopped\t%s\n", jobs[i].numero, jobs[i].commande);
         }
         i++;
     }
+    printAllJobs();
     return 0;
 }
 

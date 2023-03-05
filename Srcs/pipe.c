@@ -253,7 +253,7 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
                 Close(pipes[i-1][0]);
             }
             /* Attente de la fin des processus en foreground */
-            while(nombreForeground() > 0) {
+            while(nombreForeground() > 0 && i == nbrcommande-1) {
                 Sleep(1);
             }
         }

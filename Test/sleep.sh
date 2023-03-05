@@ -8,7 +8,7 @@ do
     i=$((i-1))
     if [ $i -eq 1 ]
     then
-        echo "Break"
+        cat Makefile
         break
     fi
 done

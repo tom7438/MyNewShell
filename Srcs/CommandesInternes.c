@@ -152,5 +152,6 @@ int quit(){
 #ifdef DEBUG
     fprintf(stderr, "quit called\n");
 #endif
+    killAllJobs();
     exit(0);
 }

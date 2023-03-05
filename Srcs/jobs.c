@@ -289,3 +289,14 @@ int stop(char *num) {
     }
     return 0;
 }
+
+int killAllJobs() {
+    int i = 0;
+    while (i < MAXJOBS) {
+        if (jobs[i].pid != 0 && jobs[i].status == EN_COURS && jobs[i].mode == BACKGROUND) {
+            Kill(jobs[i].pid, SIGTERM);
+        }
+        i++;
+    }
+    return 0;
+}

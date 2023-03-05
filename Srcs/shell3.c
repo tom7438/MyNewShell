@@ -56,12 +56,6 @@ int main() {
             i++;
         }
 
-        /* Désactivation de l'affichage des séquences d'échappement (^C et ^Z) */
-        struct termios term;
-        tcgetattr(STDIN_FILENO, &term);
-        term.c_lflag &= ~ECHO;
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
-
         if(i > 1){
             /* Plusieurs pipes */
             Multipipe(command, i);
@@ -69,10 +63,6 @@ int main() {
             /* 1 commande unique */
             commande(command);
         }
-
-        /* Réactivation de l'affichage des séquences d'échappement */
-        term.c_lflag |= ECHO;
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
 
 #ifdef DEBUG
         printAllJobs();

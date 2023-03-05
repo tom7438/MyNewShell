@@ -59,4 +59,6 @@ int Jobs();
 
 int stop(char *num);
 
+int killAllJobs();
+
 #endif //MYNEWSHELL_JOBS_H

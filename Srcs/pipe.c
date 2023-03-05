@@ -149,11 +149,11 @@ int Mypipe(struct cmdline * command) {
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             Close(fd[0]);
             Close(fd[1]);
-            /* Attente de la fin des processus en foreground */
-            while(nombreForeground() > 0) {
-                Sleep(1);
-            }
         }
+    }
+    /* Attente de la fin des processus en foreground */
+    while(nombreForeground() > 0) {
+        Sleep(1);
     }
     return 0;
 }
@@ -252,11 +252,11 @@ int Multipipe(struct cmdline * command, int nbrcommande) {
             if(i==nbrcommande-1) {
                 Close(pipes[i-1][0]);
             }
-            /* Attente de la fin des processus en foreground */
-            while(nombreForeground() > 0 && i == nbrcommande-1) {
-                Sleep(1);
-            }
         }
+    }
+    /* Attente de la fin des processus en foreground */
+    while(nombreForeground() > 0) {
+        Sleep(1);
     }
     return 0;
 }

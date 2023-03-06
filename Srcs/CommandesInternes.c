@@ -105,7 +105,6 @@ int cd(char *directory){
             exit(EXIT_FAILURE);
         }
         strcpy(cwd, home);
-        fprintf(stderr, "cd: %s\n", cwd);
 
     /* Si l'argument est -, on se deplace dans le repertoire precedent OLDPWD*/
     } else if(directory[0] ==  '-') {

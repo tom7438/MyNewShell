@@ -61,8 +61,7 @@ int Multipipe(struct cmdline * command, int nbrcommande);
  * @param pipes Le tableau des pipes
  * @param num_pipes Le nombre de pipes
  * @param numeroCommande Le numéro de la commande
- * @return 0 si la commande s'est bien exécutée
  */
-int closePipes(int pipes[][2], int num_pipes, int numeroCommande);
+void closePipes(int pipes[][2], int num_pipes, int numeroCommande);
 
 #endif //MYNEWSHELL_PIPE_H

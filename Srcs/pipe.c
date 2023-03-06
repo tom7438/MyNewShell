@@ -44,6 +44,11 @@ int redirectionE_S(struct cmdline * command){
 }
 
 int commande(struct cmdline * command) {
+    /* Masques pour les signaux */
+    sigset_t mask_all, mask_one, prev_one;
+    Sigfillset(&mask_all);
+    Sigemptyset(&mask_one);
+    Sigaddset(&mask_one, SIGCHLD);
 
     /* Test si commande vide */
     if(command->seq[0] == NULL) {return 1;}

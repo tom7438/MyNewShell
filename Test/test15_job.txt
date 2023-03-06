@@ -1,7 +1,8 @@
 #
 # test02.txt - Exécuter une commande sans argument
 #
-./sleep.sh
+# Commande longue : /usr/bin/bash -c ./Test/sleep.sh
+/usr/bin/bash -c ./Test/sleep.sh
 SLEEP 1
 TSTP
 jobs

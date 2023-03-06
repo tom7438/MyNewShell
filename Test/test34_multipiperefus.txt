@@ -1,1 +1,3 @@
+touch non.txt
+chmod u-w non.txt
 ls -l | wc | wc > non.txt

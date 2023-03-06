@@ -7,12 +7,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "csapp.h"
+#include <limits.h>
+#include "jobs.h"
 
-char CommandesInternes[5][10]={"pwd", "cd", "echo", "quit", "exit"};
+/* Tableau de commandes internes */
+char CommandesInternes[8][10]={"pwd", "cd", "quit", "exit", "fg", "bg", "jobs", "stop"};
 
 int isCommandeInterne(char *cmd){
+#ifdef DEBUG
+    fprintf(stderr, "isCommandeInterne(%s) called\n", cmd);
+#endif
     int i;
-    for(i=0; i<5; i++){
+    /* On parcourt le tableau de commandes internes */
+    for(i=0; i<8; i++){
+        /* Si la commande est interne, on retourne 1 */
         if(!strcmp(cmd, CommandesInternes[i])){
             return 1;
         }
@@ -22,7 +30,7 @@ int isCommandeInterne(char *cmd){
 
 int executeCommandeInterne(char *cmd, char **args){
 #ifdef DEBUG
-    fprintf(stderr, "executeCommandeInterne: %s\n", cmd);
+    fprintf(stderr, "executeCommandeInterne(%s) called\n", cmd);
     char **tmp = malloc(sizeof(char *)*MAXBUF);
     tmp = args;
     while(*tmp != NULL){
@@ -30,26 +38,46 @@ int executeCommandeInterne(char *cmd, char **args){
         tmp++;
     }
 #endif
+    /* On compare la commande avec les commandes internes */
+    /* On exécute la commande correspondante */
     if(!strcmp(cmd, "pwd")){
         return pwd();
     }
     else if(!strcmp(cmd, "cd")){
         cd(args[1]);
     }
-    else if(!strcmp(cmd, "echo")){
-        return echo(args);
-    }
     else if(!strcmp(cmd, "quit") || !strcmp(cmd, "exit")){
         return quit();
+    } else if (!strcmp(cmd, "fg")) {
+        if(args[1] == NULL) {
+            fprintf(stderr, "fg: argument manquant (n°job)\n");
+            return -1;
+        }
+        return fg(args[1]);
+    } else if (!strcmp(cmd, "bg")) {
+        if(args[1] == NULL) {
+            fprintf(stderr, "bg: argument manquant (n°job)\n");
+            return -1;
+        }
+        return bg(args[1]);
+    } else if (!strcmp(cmd, "jobs")) {
+        return printAllJobs();
+    } else if (!strcmp(cmd, "stop")) {
+        if(args[1] == NULL) {
+            fprintf(stderr, "stop: argument manquant (n°job)\n");
+            return -1;
+        }
+        return stop(args[1]);
     } else {
         fprintf(stderr, "Commande interne non reconnue: %s\n", cmd);
+        return -1;
     }
     return 0;
 }
 
 int pwd(){
 #ifdef DEBUG
-    fprintf(stderr, "pwd called\n");
+    fprintf(stderr, "pwd() called\n");
 #endif
     printf("%s\n", getenv("PWD"));
     return 0;
@@ -57,17 +85,19 @@ int pwd(){
 
 int cd(char *directory){
 #ifdef DEBUG
-    fprintf(stderr, "cd: %s\n", directory);
+    fprintf(stderr, "cd(%s) called\n", directory);
 #endif
     char cwd[PATH_MAX];
     char oldpwd[PATH_MAX];
 
+    /* On recupere le repertoire courant */
+    /* Il devient le repertoire precedent */
     if (getcwd(oldpwd, sizeof(oldpwd)) == NULL) {
         perror("getcwd() error");
         exit(EXIT_FAILURE);
     }
 
-    /* Si aucun argument ou l'argument ~, on se deplace dans le repertoire home */
+    /* Si aucun argument ou l'argument ~, on se deplace dans le repertoire HOME */
     if(directory == NULL || directory[0] == '~'){
         char *home = getenv("HOME");
         if(home == NULL){
@@ -76,7 +106,8 @@ int cd(char *directory){
         }
         strcpy(cwd, home);
         fprintf(stderr, "cd: %s\n", cwd);
-    /* Si l'argument est -, on se deplace dans le repertoire precedent */
+
+    /* Si l'argument est -, on se deplace dans le repertoire precedent OLDPWD*/
     } else if(directory[0] ==  '-') {
         char *last_oldpwd = getenv("OLDPWD");
         if(last_oldpwd == NULL){
@@ -84,7 +115,8 @@ int cd(char *directory){
             exit(EXIT_FAILURE);
         }
         strcpy(cwd, last_oldpwd);
-    /* Sinon on se deplace dans le repertoire specifie */
+
+    /* Sinon on utilise le repertoire specifie */
     } else {
         strcpy(cwd, directory);
     }
@@ -96,7 +128,6 @@ int cd(char *directory){
     }
 
     /* On met a jour les variables d'environnement */
-
     if(setenv("OLDPWD", oldpwd, 1) == -1){
         perror("setenv(OLDPWD) error ");
         exit(EXIT_FAILURE);
@@ -109,25 +140,11 @@ int cd(char *directory){
     return 0;
 }
 
-int echo(char **args){
-#ifdef DEBUG
-    fprintf(stderr, "echo: %s\n", args[1]);
-#endif
-    int i=1;
-    while(args[i] != NULL){
-        if(i != 1) {
-            printf(" ");
-        }
-        printf("%s", args[i]);
-        i++;
-    }
-    printf("\n");
-    return 1;
-}
-
 int quit(){
 #ifdef DEBUG
     fprintf(stderr, "quit called\n");
 #endif
+    /* On tue tous les processus restants */
+    killAllJobs();
     exit(0);
 }

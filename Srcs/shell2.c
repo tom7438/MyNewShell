@@ -9,12 +9,12 @@
 #include "CommandesInternes.h"
 #include "handler.h"
 #include "pipe.h"
+#include "jobs.h"
 
 int main() {
+    initJobs();
+    Signal(SIGCHLD, sigchld_handler);
     int couleur = 31;
-    /* Ignore les signaux Ctrl-C et Ctrl-Z */
-    Signal(SIGINT, sigint_handler);
-    Signal(SIGTSTP, SIG_IGN);
 	while (1) {
 		struct cmdline *command;
 
@@ -38,12 +38,6 @@ int main() {
 			printf("exit\n");
 			exit(0);
 		}
-
-        /* Si Ctrl-C est pressé */
-        if(sigint_flag){
-            sigint_flag = 0;
-            continue;
-        }
 
 		if (command->err) {
 			/* Syntax error, read another command */

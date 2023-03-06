@@ -49,6 +49,7 @@ typedef enum {
 /**
  * \struct Job
  * @brief Structure d'un job
+ * @details Structure d'un job contenant le pid, le numéro, le status, la commande et le mode
  * @var pid_t pid Identifiant du processus
  * @var int numero Numéro du job
  * @var Status status État du job

@@ -13,6 +13,20 @@
 #include "handler.h"
 #include <termios.h>
 
+void printPrompt(int couleur){
+    char *rep=(char *)malloc(sizeof(char)*100);
+    printf("\033[%dm", couleur);
+    printf("\033[4mMyShell3\033[00m");
+    printf(":");
+    if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
+        printf("\033[34m~\033[00m");
+    } else{
+        printf("\033[34m%s\033[00m",getcwd(rep, 100));
+    }
+    printf(" # ");
+    free(rep);
+}
+
 int main() {
     initJobs();
     /* Affectation des traitant de signaux */
@@ -25,16 +39,7 @@ int main() {
 		struct cmdline *command;
 
         /* Affichage du prompt */
-        char *rep=(char *)malloc(sizeof(char)*100);
-        printf("\033[%dm", couleur);
-        printf("\033[4mMyShell3\033[00m");
-        printf(":");
-        if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
-            printf("\033[34m~\033[00m");
-        } else{
-            printf("\033[34m%s\033[00m",getcwd(rep, 100));
-        }
-        printf(" # ");
+        printPrompt(couleur);
         if((couleur=(couleur+1-31)%18+31)==34){couleur++;};
 
 		command = readcmd();
@@ -51,6 +56,7 @@ int main() {
 			continue;
 		}
 
+        /* Compte le nombre de commandes séparées par des pipes */
         int i = 0;
         while(command->seq[i] != NULL){
             i++;

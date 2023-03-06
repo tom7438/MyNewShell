@@ -11,7 +11,6 @@ HEADDIR=Headers
 CC=gcc
 CFLAGS=-Wall -Werror -g
 CPPFLAGS=-I$(HEADDIR)
-#VPATH=src/
 
 # Note: -lnsl does not seem to work on Mac OS but will
 # probably be necessary on Solaris for linking network-related functions 
@@ -25,9 +24,6 @@ endif
 ifdef TEST
 	CPPFLAGS+=-DTEST
 endif
-
-SRCS = $(wildcard $(SRCDIR)/*.c)
-OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 
 ifdef MAIN2
 	EXEC = $(BINDIR)/shell2

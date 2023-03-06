@@ -300,5 +300,6 @@ int killAllJobs() {
         }
         i++;
     }
+    free(jobs);
     return 0;
 }

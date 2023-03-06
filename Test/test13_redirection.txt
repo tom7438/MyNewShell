@@ -1,0 +1,4 @@
+#
+# test redirection qui echoue
+#
+ls>oui.txt

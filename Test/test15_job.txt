@@ -1,0 +1,14 @@
+#
+# test02.txt - Exécuter une commande sans argument
+#
+./sleep.sh
+SLEEP 1
+TSTP
+jobs
+bg 1
+SLEEP 1
+stop 1
+SLEEP 1
+jobs
+bg 1
+wait

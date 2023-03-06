@@ -27,6 +27,27 @@ int commande(struct cmdline * command);
 int Mypipe(struct cmdline * command);
 
 /**
+ *  @brief redirige la entré de la commande
+ *  @param command La commande à exécuter
+ *  @return 1 si l'entré n'est pas accessible
+        0 si la redirection de l'entré a été correctement faite*/
+int redirectionentre(struct cmdline * command);
+
+/**
+ *  @brief redirige la entré de la commande
+ *  @param command La commande à exécuter
+ *  @return 1 si la sortie n'est pas accessible
+        0 si la redirection de sortie a été correctement faite*/
+int redirectionsortie(struct cmdline * command);
+
+/**
+ *  @brief test et redirige la entré de la commande
+ *  @param command La commande à exécuter
+ *  @return 1 si l'entré ou la sortie n'est pas accessible
+        0 si la redirection de la sortie a été correctement faite*/
+int redirectionE_S(struct cmdline * command);
+
+/**
  * @brief Fonction qui gère n commandes séparées par n-1 pipes
  * @param command La commande à exécuter
  * @param nbrcommande Le nombre de commandes

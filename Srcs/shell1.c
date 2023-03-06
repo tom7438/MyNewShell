@@ -8,8 +8,30 @@
 #include "csapp.h"
 #include "CommandesInternes.h"
 #include "pipe.h"
+#include "jobs.h"
+#include "handler.h"
+
+void printPrompt(int couleur){
+    char *rep=(char *)malloc(sizeof(char)*100);
+    printf("\033[%dm", couleur);
+    printf("\033[4mMyShell3\033[00m");
+    printf(":");
+    if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
+        printf("\033[34m~\033[00m");
+    } else{
+        printf("\033[34m%s\033[00m",getcwd(rep, 100));
+    }
+    printf(" # ");
+    free(rep);
+}
 
 int main() {
+    initJobs();
+    /* Affectation des traitant de signaux */
+    Signal(SIGCHLD, sigchld_handler);
+    Signal(SIGINT, sigint_handler);
+    Signal(SIGTSTP, sigtstp_handler);
+
 #ifndef TEST
     int couleur = 31;
 #endif
@@ -18,16 +40,7 @@ int main() {
 
 #ifndef TEST
         /* Affichage du prompt */
-        char *rep=(char *)malloc(sizeof(char)*100);
-        printf("\033[%dm", couleur);
-        printf("\033[4mMyShell1\033[00m");
-        printf(":");
-        if(!strcmp(getenv("HOME"), getcwd(rep, 100))){
-            printf("\033[34m~\033[00m");
-        } else{
-            printf("\033[34m%s\033[00m",getcwd(rep, 100));
-        }
-        printf(" # ");
+        printPrompt(couleur);
         if((couleur=(couleur+1-31)%18+31)==34){couleur++;};
 #endif
 

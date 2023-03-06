@@ -1,0 +1,4 @@
+#
+# test redirection réussi
+#
+grep oui <oui.txt | wc | wc | wc

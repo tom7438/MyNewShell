@@ -11,72 +11,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-int commande(struct cmdline * command) {
-    /* Masques pour les signaux */
-    sigset_t mask_all, mask_one, prev_one;
-    Sigfillset(&mask_all);
-    Sigemptyset(&mask_one);
-    Sigaddset(&mask_one, SIGCHLD);
-
-    /* Commande interne */
-    if(command->seq[0] == NULL) {
-        return 1;
-    }
-
-    /* Redirections */
-    if(isCommandeInterne(command->seq[0][0])){
-        executeCommandeInterne(command->seq[0][0], command->seq[0]);
-    } else {
-        if(command->in != NULL){
-            if ((access(command->in, R_OK))){
-                printf("%s: Permission denied entré\n", command->in);
-                return 1;
-            }
-            int fdin = Open(command->in, O_RDONLY, 0);
-            Dup2(fdin, STDIN_FILENO);
-            Close(fdin);
-        }
-        if(command->out != NULL){
-            if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
-                printf("%s: Permission denied sortie\n", command->out);
-                return 1;
-            }
-            int fdout = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            Dup2(fdout, STDOUT_FILENO);
-            Close(fdout);
-        }
-
-/* redirectionentre : redirige la entré de la commande
-        renvoi 1 si la redirection de entré n'est pas accessible
-        renvoi 0 si la redirection de entré a été correctement faite*/
 int redirectionentre(struct cmdline * command){
     if ((access(command->in, R_OK))){
         printf("%s: Permission denied entré\n", command->in);
         return 1;
-        }
+    }
     int fd_in = Open(command->in, O_RDONLY, 0);
     Dup2(fd_in, STDIN_FILENO);
     Close(fd_in);
     return 0;
 }
 
-/* redirectionsortie : redirige la sortie de la commande
-        renvoi 1 si la redirection de sortie n'est pas accessible
-        renvoi 0 si la redirection de sortie a été correctement faite*/
 int redirectionsortie(struct cmdline * command){
     if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
         printf("%s: Permission denied sortie\n", command->out);
         return 1;
-        }
-        int fd_out = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        Dup2(fd_out, STDOUT_FILENO);
-        Close(fd_out);
-        return 0;
+    }
+    int fd_out = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    Dup2(fd_out, STDOUT_FILENO);
+    Close(fd_out);
+    return 0;
 }
 
-/* redirectionE_S : utilise les deux commande ci-dessus pour changer si il le faut, les E/S
-        renvoi 0 si fait avec succés
-        renvoi 1 si un fichier n'est pas accéssible*/
 int redirectionE_S(struct cmdline * command){
     if (command->in != NULL){
         if (redirectionentre(command)==1){return 1;}
@@ -87,34 +43,17 @@ int redirectionE_S(struct cmdline * command){
     return 0;
 }
 
-/* closePipes : Ferme tous les pipes sauf les deux extrémité de tube utilisé par le fils*/
-void closePipes(int pipes[][2], int num_pipes, int numeroCommande) {
-    int depart = 0;
-    if(numeroCommande>1)
-        depart = numeroCommande-1;
-    for (int i = depart; i < num_pipes; i++) {
-        if(i!=numeroCommande){
-            Close(pipes[i][1]);
-        }
-        if(i!=numeroCommande-1){
-            Close(pipes[i][0]);
-        }
-    }
-}
-
-/*Commande : Execute une commande en gerant les redirections E/S */
 int commande(struct cmdline * command) {
 
-    /*test si commande vide*/
+    /* Test si commande vide */
     if(command->seq[0] == NULL) {return 1;}
-
-    /* Redirections */
-    if (redirectionE_S(command)==1){return 1;}
 
     /*command interne*/
     if(isCommandeInterne(command->seq[0][0])){
         executeCommandeInterne(command->seq[0][0], command->seq[0]);
     } else {
+        /* Redirections */
+        if (redirectionE_S(command)==1){return 1;}
         /* Commande externe */
         pid_t pid;
         Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
@@ -142,8 +81,20 @@ int commande(struct cmdline * command) {
     return 0;
 }
 
+void closePipes(int pipes[][2], int num_pipes, int numeroCommande) {
+    int depart = 0;
+    if(numeroCommande>1)
+        depart = numeroCommande-1;
+    for (int i = depart; i < num_pipes; i++) {
+        if(i!=numeroCommande){
+            Close(pipes[i][1]);
+        }
+        if(i!=numeroCommande-1){
+            Close(pipes[i][0]);
+        }
+    }
+}
 
-/* Mypipe : Execute 2 commandes avec un pipe */
 int Mypipe(struct cmdline * command) {
     /* Masques pour les signaux */
     sigset_t mask_all, mask_one, prev_one;
@@ -186,7 +137,7 @@ int Mypipe(struct cmdline * command) {
         if((pid[1] = Fork()) == 0) {
             /* Fils 2 */
 
-            /*redirection sortie*/
+            /* Redirection sortie */
             if(command->out != NULL){
                 if (redirectionsortie(command)==1){return 1;}
             }
@@ -194,13 +145,9 @@ int Mypipe(struct cmdline * command) {
             Close(fd[0]);
             Close(fd[1]);
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
-            if(execvp(command->seq[1][0], command->seq[1]) < 0){
 
-            /*lance les commandes*/
-            if(isCommandeInterne(command->seq[1][0])) {
-                executeCommandeInterne(command->seq[1][0], command->seq[1]);
-                exit(0);
-            } else if(execvp(command->seq[1][0], command->seq[1]) < 0){
+            /* Commande externe */
+            if(execvp(command->seq[1][0], command->seq[1]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[1][0]);
                 exit(1);
             }
@@ -226,7 +173,6 @@ int Mypipe(struct cmdline * command) {
     return 0;
 }
 
-/*Multipipe : Execute une ligne de commande avec autant de pipe que l'on veux*/
 int Multipipe(struct cmdline * command, int nbrcommande) {
     /* Masques pour les signaux */
     sigset_t mask_all, mask_one, prev_one;

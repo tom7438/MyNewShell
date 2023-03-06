@@ -17,4 +17,4 @@ fi
 
 echo "Running test ${TestFile} with shell V${numShell}"
 
-./sdriver.pl -t ${TestFile} -s ${ShellCur}
+./sdriver.pl -t ${TestFile} -s ${ShellCur} >tmp1

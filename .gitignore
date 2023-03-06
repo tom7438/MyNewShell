@@ -1,4 +1,14 @@
-/Objs/*.o
-/Bin/*
+/Objs/shell1.o
+/Objs/shell2.o
+/Objs/shell3.o
+/Objs/CommandesInternes.o
+/Objs/csapp.o
+/Objs/handler.o
+/Objs/jobs.o
+/Objs/pipe.o
+/Objs/readcmd.o
+/Bin/shell1
+/Bin/shell2
+/Bin/shell3
 *.txt
 sdriver.pl

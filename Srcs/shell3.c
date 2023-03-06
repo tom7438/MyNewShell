@@ -34,13 +34,17 @@ int main() {
     Signal(SIGINT, sigint_handler);
     Signal(SIGTSTP, sigtstp_handler);
 
+#ifndef TEST
     int couleur = 31;
+#endif
 	while (1) {
 		struct cmdline *command;
 
+#ifndef TEST
         /* Affichage du prompt */
         printPrompt(couleur);
         if((couleur=(couleur+1-31)%18+31)==34){couleur++;};
+#endif
 
 		command = readcmd();
 

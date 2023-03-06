@@ -57,13 +57,13 @@ int commande(struct cmdline * command) {
     if(isCommandeInterne(command->seq[0][0])){
         executeCommandeInterne(command->seq[0][0], command->seq[0]);
     } else {
-        /* Redirections */
-        if (redirectionE_S(command)==1){return 1;}
         /* Commande externe */
         pid_t pid;
         Sigprocmask(SIG_BLOCK, &mask_one, &prev_one); /* Block SIGCHLD */
         if((pid = Fork()) == 0){
             /* Fils */
+            /* Redirections */
+            if (redirectionE_S(command)==1){return 1;}
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[0][0], command->seq[0]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);

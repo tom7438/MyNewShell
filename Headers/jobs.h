@@ -121,7 +121,7 @@ int printAllJobs();
 
 /**
  * @brief Supprime un job de la liste des jobs
- * @param pid
+ * @param pid Identifiant du processus
  * @return 0 si tout s'est bien passé, -1 sinon
  */
 int deletejob(pid_t pid);

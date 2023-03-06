@@ -16,3 +16,4 @@ Exécution :
 Shell V1 : ./Bin/shell1
 Shell V2 : ./Bin/shell2
 Shell V3 : ./Bin/shell3
+Test : ./Test/test.sh <numéro de la version> <nom du fichier de test>

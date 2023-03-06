@@ -1,4 +1,4 @@
 #
-# test redirection qui echoue
+# test redirection qui marche
 #
 ls>oui.txt

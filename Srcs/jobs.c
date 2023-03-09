@@ -181,7 +181,7 @@ int nombreForeground() {
 int killJobsForeground() {
     int i = 0;
     while (i < MAXJOBS) {
-        if (jobs[i].pid != 0 && jobs[i].status == EN_COURS && jobs[i].mode == FOREGROUND) {
+        if (jobs[i].pid != 0 && jobs[i].mode == FOREGROUND) {
             Kill(jobs[i].pid, SIGTERM);
         }
         i++;

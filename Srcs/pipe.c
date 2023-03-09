@@ -12,9 +12,12 @@
 #include <string.h>
 
 int redirectionentre(struct cmdline * command){
-    if ((access(command->in, R_OK))){
+    if(access(command->in, F_OK)){
+        printf("%s: Fichier non existant\n", command->in);
+        exit(1);
+    } else if ((access(command->in, R_OK))){
         printf("%s: Permission denied entré\n", command->in);
-        return 1;
+        exit(1);
     }
     int fd_in = Open(command->in, O_RDONLY, 0);
     Dup2(fd_in, STDIN_FILENO);
@@ -23,9 +26,12 @@ int redirectionentre(struct cmdline * command){
 }
 
 int redirectionsortie(struct cmdline * command){
-    if ((access(command->out, F_OK)==0) && (access(command->out, W_OK))){
+    if(access(command->out, F_OK)){
+        printf("%s: Fichier non existant\n", command->out);
+        exit(1);
+    } else if (access(command->out, W_OK)){
         printf("%s: Permission denied sortie\n", command->out);
-        return 1;
+        exit(1);
     }
     int fd_out = Open(command->out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     Dup2(fd_out, STDOUT_FILENO);
@@ -35,10 +41,10 @@ int redirectionsortie(struct cmdline * command){
 
 int redirectionE_S(struct cmdline * command){
     if (command->in != NULL){
-        if (redirectionentre(command)==1){return 1;}
+        redirectionentre(command);
     }
     if (command->out != NULL){
-        if (redirectionsortie(command)==1){return 1;}
+        redirectionsortie(command);
     }
     return 0;
 }
@@ -63,7 +69,7 @@ int commande(struct cmdline * command) {
         if((pid = Fork()) == 0){
             /* Fils */
             /* Redirections */
-            if (redirectionE_S(command)==1){return 1;}
+            redirectionE_S(command);
             Sigprocmask(SIG_SETMASK, &prev_one, NULL); /* Unblock SIGCHLD */
             if(execvp(command->seq[0][0], command->seq[0]) < 0){
                 printf("Commande externe non reconnue: %s\n", command->seq[0][0]);
